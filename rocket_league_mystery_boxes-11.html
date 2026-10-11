@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>صناديق مهارات روكت ليق | Rocket League Skill Boxes</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#111c30;--blue:#263b5c;--gold:#fbbf24}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:radial-gradient(circle at top,#1c3760,#0b1220 55%);color:#fff;min-height:100vh}
+main{max-width:1050px;margin:auto;padding:18px}
+header{background:#101827;border:1px solid #334155;border-radius:22px;padding:22px 14px;text-align:center;margin-bottom:16px}
+h1{margin:0;color:var(--gold);font-size:clamp(25px,5vw,38px)}
+header p{margin:10px 0 14px;color:#cbd5e1}
+.legend{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+.legend span{border-radius:999px;padding:7px 11px;font-weight:bold;background:#1e293b}
+.stats{margin-top:14px;color:#e2e8f0}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+button{font:inherit;font-weight:bold;cursor:pointer;border:0;border-radius:12px;padding:12px 16px;background:#fbbf24;color:#172033}
+button.secondary{background:#26364f;color:#fff;border:1px solid #475569}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.box{min-height:110px;border:1px solid #52637a;border-radius:16px;background:linear-gradient(145deg,#263b5c,#142238);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px;text-align:center;transition:transform .15s,border-color .15s}
+.box:hover:not(:disabled){transform:translateY(-2px);border-color:var(--gold)}
+.box .emoji{font-size:28px}
+.box .num{font-size:16px;font-weight:bold}
+.box .en-num{font-size:12px;color:#cbd5e1;direction:ltr}
+.box:disabled{cursor:default;transform:none}
+.box.open{border-width:2px}
+.box.open.easy{background:#14532d;border-color:#4ade80}
+.box.open.medium{background:#713f12;border-color:#facc15}
+.box.open.hard{background:#7f1d1d;border-color:#f87171}
+.ar-name{font-weight:bold;font-size:15px;line-height:1.4}
+.en-name{font-size:13px;direction:ltr;line-height:1.35}
+.level{font-size:13px;font-weight:bold}
+footer{text-align:center;color:#94a3b8;font-size:12px;margin:18px 0}
+@media(max-width:600px){main{padding:10px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.box{min-height:105px;padding:7px}.ar-name{font-size:13px}.en-name{font-size:11px}.level{font-size:12px}}
+@media(max-width:360px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<h1>⚽ ROCKET LEAGUE</h1>
+<h2 style="margin:8px 0 0">صناديق المهارات الغامضة 🎁<br><span dir="ltr">Mystery Skill Boxes</span></h2>
+<p>اختر صندوقًا لتكشف المهارة داخله<br><span dir="ltr">Choose a box to reveal the skill inside</span></p>
+<div class="legend">
+<span style="color:#4ade80">🟢 سهل · Easy</span>
+<span style="color:#facc15">🟡 متوسط · Medium</span>
+<span style="color:#f87171">🔴 صعب · Hard</span>
+</div>
+<div class="stats" id="stats">Opened 0 of 50 boxes · فتحت 0 من 50 صندوقًا</div>
+</header>
+<div class="controls">
+<button id="newRound">🔀 جولة جديدة وتبديل المهارات · New Round & Shuffle Skills</button>
+<button class="secondary" id="reset">🔒 قفل الصناديق · Lock Boxes</button>
+</div>
+<section class="grid" id="grid" aria-label="صناديق المهارات Skill Boxes"></section>
+<footer>الأسماء العربية ترجمة تقريبية لبعض حركات روكت ليق.<br><span dir="ltr">Arabic names are approximate translations of some Rocket League moves.</span><br><br><strong style="color:#fbbf24;font-size:14px">تم تصميمو من قبل يوسف عصام الحذيفي<br><span dir="ltr">Designed by Yousef Essam Alhothaifi</span></strong></footer>
+</main>
+<script>
+const original = [
+["مراوغة هوائية","Air Dribble","hard"],["إعادة ضبط القفزة","Flip Reset","hard"],["تسديدة ماستي","Musty Flick","medium"],["لمستان هوائيتان","Double Tap","medium"],["تسديدة السقف","Ceiling Shot","medium"],["قلبة السرعة","Speed Flip","medium"],["بريزي فليك","Breezi Flick","hard"],["اندفاع الموجة","Wave Dash","easy"],["قفزة بوغو","Pogo","hard"],["تسديدة تحويلية","Redirect","medium"],
+["قلبة نصفية","Half Flip","easy"],["ضربة ضغط أرضية","Ground Pinch","medium"],["دوران هوائي يسار","Air Roll Left","medium"],["دوران هوائي يمين","Air Roll Right","medium"],["ارتفاع هوائي سريع","Fast Aerial","easy"],["مراوغة أرضية","Ground Dribble","easy"],["تسديدة قوية","Power Shot","easy"],["اندفاع الجدار","Wall Dash","hard"],["دوران الإعصار","Tornado Spin","medium"],["ضربة ضغط هوائية","Air Pinch","hard"],
+["ضربة ضغط الجدار","Wall Pinch","medium"],["ماستي مع إعادة ضبط","Musty Reset","hard"],["فليك للخلف","Backwards Flick","medium"],["انطلاقة البداية السريعة","Speed Kickoff","medium"],["دفاع الظل","Shadow Defense","easy"],["دفاع اللوحة الخلفية","Backboard Defense","medium"],["استعادة التوازن بسرعة","Fast Recovery","easy"],["قطع بالانزلاق","Powerslide Cut","medium"],["تحويل التسديدة هوائيًا","Aerial Redirect","medium"],["قراءة السقف","Ceiling Read","hard"],
+["إلغاء القفلة","Flip Cancel","medium"],["استقبال الكرة ثم فليك","Catch and Flick","medium"],["تسديدة الخطاف","Hook Shot","easy"],["مراوغة الارتداد","Bounce Dribble","easy"],["قلبة أمامية","Front Flip","easy"],["قلبة خلفية","Back Flip","easy"],["قلبة جانبية","Side Flip","easy"],["مجموعة حركات استعراضية","Freestyle Combo","hard"],["قراءة اللوحة الخلفية","Backboard Read","medium"],["تمويه دفاعي","Fake Challenge","medium"],
+["فليك أرضي","Ground Flick","medium"],["تسديدة ضغط","Pinch Shot","medium"],["ارتفاع هوائي عالٍ","High Aerial","easy"],["ارتفاع هوائي منخفض","Low Aerial","easy"],["لمسة ناعمة","Soft Touch","easy"],["لمسة قوية","Heavy Touch","easy"],["فليك تمويهي","Fake Flick","medium"],["مراوغة هوائية مع صدم الخصم","Air Dribble Bump","hard"],["تسديدة إعادة الضبط","Reset Shot","hard"],["استعادة التوازن عند الجدار","Wall Recovery","medium"]
+];
+let deck = original.map((x,i)=>({id:i,ar:x[0],en:x[1],level:x[2]}));
+const opened = new Set();
+const grid = document.getElementById('grid');
+const stats = document.getElementById('stats');
+function levelText(level){
+  return level==='easy'?'🟢 سهل · Easy':level==='medium'?'🟡 متوسط · Medium':'🔴 صعب · Hard';
+}
+function render(){
+  grid.innerHTML='';
+  deck.forEach((item,index)=>{
+    const btn=document.createElement('button');
+    btn.className='box';
+    const isOpen=opened.has(index);
+    if(isOpen){
+      btn.classList.add('open',item.level);
+      btn.innerHTML=`<div class="emoji">🎁</div><div class="ar-name"></div><div class="en-name"></div><div class="level">${levelText(item.level)}</div>`;
+      btn.querySelector('.ar-name').textContent=item.ar;
+      btn.querySelector('.en-name').textContent=item.en;
+      btn.disabled=true;
+    } else {
+      btn.innerHTML=`<div class="emoji">📦</div><div class="num">صندوق ${index+1}</div><div class="en-num">BOX ${index+1}</div>`;
+      btn.addEventListener('click',()=>{opened.add(index);render();});
+    }
+    grid.appendChild(btn);
+  });
+  stats.textContent=`فتحت ${opened.size} من ${deck.length} صندوقًا · Opened ${opened.size} of ${deck.length} boxes`;
+}
+document.getElementById('newRound').setAttribute('aria-label','جولة جديدة وتبديل المهارات / New round and shuffle skills');
+document.getElementById('reset').setAttribute('aria-label','قفل الصناديق / Lock boxes');
+document.getElementById('newRound').addEventListener('click',()=>{
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  opened.clear();render();
+});
+document.getElementById('reset').addEventListener('click',()=>{opened.clear();render();});
+render();
+</script>
+</body>
+</html>
